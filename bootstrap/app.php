@@ -18,4 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+        $exceptions->renderable(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, Request $request) {
+            return redirect()->back()->withInput()->withErrors([
+                'images' => 'Ukuran total file yang diunggah melebihi batas maksimal server. Harap kurangi jumlah atau ukuran gambar.',
+            ]);
+        });
     })->create();
