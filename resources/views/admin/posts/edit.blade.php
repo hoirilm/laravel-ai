@@ -20,15 +20,17 @@
                         </div>
 
                         <div>
-                            <x-input-label for="cover_image" :value="__('Cover Image (Optional)')" />
-                            @if($post->cover_image)
-                                <div class="mb-2">
-                                    <img src="{{ Storage::url($post->cover_image) }}" alt="Current Cover" class="w-32 h-auto rounded">
+                            <x-input-label for="images" :value="__('Images (Optional)')" />
+                            @if(!empty($post->images))
+                                <div class="mb-4 flex flex-wrap gap-4">
+                                    @foreach($post->images as $image)
+                                        <img src="{{ Storage::url($image) }}" alt="Current Image" class="w-32 h-32 object-cover rounded shadow-sm">
+                                    @endforeach
                                 </div>
                             @endif
-                            <input id="cover_image" name="cover_image" type="file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*" />
-                            <x-input-error class="mt-2" :messages="$errors->get('cover_image')" />
-                            <p class="text-xs text-gray-500 mt-1">Leave empty to keep the current cover image.</p>
+                            <input id="images" name="images[]" type="file" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*" />
+                            <x-input-error class="mt-2" :messages="$errors->get('images')" />
+                            <p class="text-xs text-gray-500 mt-1">Leave empty to keep current images, or upload new ones to replace them.</p>
                         </div>
 
                         <div>

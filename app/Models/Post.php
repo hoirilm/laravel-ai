@@ -10,9 +10,16 @@ class Post extends Model
         'user_id',
         'title',
         'slug',
-        'cover_image',
+        'images',
         'content',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'images' => 'array',
+        ];
+    }
 
     public function user()
     {

@@ -9,18 +9,15 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @forelse($posts as $post)
-                <article class="flex flex-col items-start justify-between bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 h-full">
-                    @if($post->cover_image)
+                <a href="{{ route('post.show', $post->slug) }}" class="flex flex-col items-start justify-between bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition duration-200 h-full group cursor-pointer block">
+                    @if(!empty($post->images))
                         <div class="relative w-full mb-4">
-                            <img src="{{ Storage::url($post->cover_image) }}" alt="{{ $post->title }}" class="aspect-[16/9] w-full rounded-xl bg-gray-100 object-cover">
+                            <img src="{{ Storage::url($post->images[0]) }}" alt="{{ $post->title }}" class="aspect-[16/9] w-full rounded-xl bg-gray-100 object-cover">
                         </div>
                     @endif
-                    <div class="group relative mt-auto w-full">
-                        <h3 class="mt-3 text-lg font-bold leading-tight text-gray-900 group-hover:text-gray-600">
-                            <a href="{{ route('post.show', $post->slug) }}">
-                                <span class="absolute inset-0"></span>
-                                {{ $post->title }}
-                            </a>
+                    <div class="mt-auto w-full">
+                        <h3 class="mt-3 text-lg font-bold leading-tight text-gray-900 group-hover:text-indigo-600 transition">
+                            {{ $post->title }}
                         </h3>
                         <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-gray-600">{{ Str::limit(strip_tags($post->content), 100) }}</p>
                     </div>
@@ -30,7 +27,7 @@
                         </div>
                         <time datetime="{{ $post->created_at->toDateString() }}">{{ $post->created_at->format('M d, Y') }}</time>
                     </div>
-                </article>
+                </a>
             @empty
                 <div class="col-span-full text-center text-gray-500 py-12">
                     <p>No posts available yet.</p>

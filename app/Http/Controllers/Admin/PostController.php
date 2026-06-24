@@ -28,19 +28,21 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'cover_image' => 'nullable|image|max:2048', // 2MB max
+            'images.*' => 'nullable|image|max:2048', // 2MB max per image
         ]);
 
-        $coverImagePath = null;
-        if ($request->hasFile('cover_image')) {
-            $coverImagePath = $request->file('cover_image')->store('covers', 'public');
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePaths[] = $image->store('posts', 'public');
+            }
         }
 
         $request->user()->posts()->create([
             'title' => $validated['title'],
             'slug' => Str::slug($validated['title']) . '-' . uniqid(),
             'content' => $validated['content'],
-            'cover_image' => $coverImagePath,
+            'images' => empty($imagePaths) ? null : $imagePaths,
         ]);
 
         return redirect()->route('admin.posts.index')->with('success', 'Post created successfully.');
@@ -56,22 +58,27 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'cover_image' => 'nullable|image|max:2048',
+            'images.*' => 'nullable|image|max:2048',
         ]);
 
-        $coverImagePath = $post->cover_image;
-        if ($request->hasFile('cover_image')) {
-            if ($coverImagePath) {
-                Storage::disk('public')->delete($coverImagePath);
+        $imagePaths = $post->images ?? [];
+        if ($request->hasFile('images')) {
+            if (!empty($imagePaths)) {
+                foreach ($imagePaths as $path) {
+                    Storage::disk('public')->delete($path);
+                }
             }
-            $coverImagePath = $request->file('cover_image')->store('covers', 'public');
+            $imagePaths = [];
+            foreach ($request->file('images') as $image) {
+                $imagePaths[] = $image->store('posts', 'public');
+            }
         }
 
         $post->update([
             'title' => $validated['title'],
             'slug' => Str::slug($validated['title']) . '-' . uniqid(),
             'content' => $validated['content'],
-            'cover_image' => $coverImagePath,
+            'images' => empty($imagePaths) ? null : $imagePaths,
         ]);
 
         return redirect()->route('admin.posts.index')->with('success', 'Post updated successfully.');
@@ -79,8 +86,10 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        if ($post->cover_image) {
-            Storage::disk('public')->delete($post->cover_image);
+        if (!empty($post->images)) {
+            foreach ($post->images as $path) {
+                Storage::disk('public')->delete($path);
+            }
         }
         $post->delete();
 

@@ -11,9 +11,11 @@
             </div>
         </header>
 
-        @if($post->cover_image)
-            <div class="mb-10">
-                <img src="{{ Storage::url($post->cover_image) }}" alt="{{ $post->title }}" class="w-full rounded-2xl object-cover shadow-sm">
+        @if(!empty($post->images))
+            <div class="mb-10 grid gap-6 grid-cols-1 sm:grid-cols-2">
+                @foreach($post->images as $image)
+                    <img src="{{ Storage::url($image) }}" alt="{{ $post->title }}" class="w-full aspect-[4/3] rounded-2xl object-cover shadow-sm">
+                @endforeach
             </div>
         @endif
 
