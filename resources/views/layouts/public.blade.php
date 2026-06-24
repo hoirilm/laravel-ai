@@ -18,12 +18,19 @@
                                 {{ config('app.name', 'Blog') }}
                             </a>
                         </div>
+                        <div class="hidden sm:-my-px sm:ml-10 sm:flex space-x-8">
+                            <a href="{{ route('home') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('home') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                                Beranda
+                            </a>
+                        </div>
                     </div>
                     <div class="flex items-center space-x-4">
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="text-sm text-gray-700 hover:text-gray-900">Dashboard</a>
+                            <a href="{{ url('/dashboard') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Dashboard Penulis
+                            </a>
                         @else
-                            <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-gray-900">Log in</a>
+                            <a href="{{ route('login') }}" class="text-sm text-gray-500 hover:text-gray-900">Log in Penulis</a>
                         @endauth
                     </div>
                 </div>
