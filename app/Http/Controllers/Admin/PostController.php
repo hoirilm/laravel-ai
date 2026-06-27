@@ -12,9 +12,10 @@ class PostController extends Controller
 {
     public function index()
     {
-        // For minimalist approach, we assume all users in admin panel can see all posts or only theirs.
-        // Let's just show all posts for simplicity.
-        $posts = Post::with('user')->latest()->paginate(15);
+        $posts = Post::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(15);
+
         return view('admin.posts.index', compact('posts'));
     }
 
@@ -26,9 +27,9 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'images.*' => 'nullable|image|max:2048', // 2MB max per image
+            'title'    => 'required|string|max:255',
+            'content'  => 'required|string',
+            'images.*' => 'nullable|image|max:2048',
         ]);
 
         $imagePaths = [];
@@ -39,25 +40,29 @@ class PostController extends Controller
         }
 
         $request->user()->posts()->create([
-            'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']) . '-' . uniqid(),
+            'title'   => $validated['title'],
+            'slug'    => Str::slug($validated['title']) . '-' . uniqid(),
             'content' => $validated['content'],
-            'images' => empty($imagePaths) ? null : $imagePaths,
+            'images'  => empty($imagePaths) ? null : $imagePaths,
         ]);
 
-        return redirect()->route('admin.posts.index')->with('success', 'Post created successfully.');
+        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dibuat.');
     }
 
     public function edit(Post $post)
     {
+        abort_if($post->user_id !== auth()->id(), 403);
+
         return view('admin.posts.edit', compact('post'));
     }
 
     public function update(Request $request, Post $post)
     {
+        abort_if($post->user_id !== auth()->id(), 403);
+
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'title'    => 'required|string|max:255',
+            'content'  => 'required|string',
             'images.*' => 'nullable|image|max:2048',
         ]);
 
@@ -75,17 +80,19 @@ class PostController extends Controller
         }
 
         $post->update([
-            'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']) . '-' . uniqid(),
+            'title'   => $validated['title'],
+            'slug'    => Str::slug($validated['title']) . '-' . uniqid(),
             'content' => $validated['content'],
-            'images' => empty($imagePaths) ? null : $imagePaths,
+            'images'  => empty($imagePaths) ? null : $imagePaths,
         ]);
 
-        return redirect()->route('admin.posts.index')->with('success', 'Post updated successfully.');
+        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil diupdate.');
     }
 
     public function destroy(Post $post)
     {
+        abort_if($post->user_id !== auth()->id(), 403);
+
         if (!empty($post->images)) {
             foreach ($post->images as $path) {
                 Storage::disk('public')->delete($path);
@@ -93,6 +100,6 @@ class PostController extends Controller
         }
         $post->delete();
 
-        return redirect()->route('admin.posts.index')->with('success', 'Post deleted successfully.');
+        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dihapus.');
     }
 }

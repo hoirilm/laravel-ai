@@ -1,3 +1,68 @@
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<style>
+    /* Sesuaikan Quill dengan tema Tailwind indigo */
+    #quill-editor {
+        border: 1px solid #d1d5db; /* border-gray-300 */
+        border-radius: 0 0 0.375rem 0.375rem;
+        min-height: 280px;
+        font-size: 0.875rem;
+        font-family: inherit;
+    }
+    .ql-toolbar.ql-snow {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem 0.375rem 0 0;
+        background-color: #f9fafb;
+        font-family: inherit;
+    }
+    .ql-toolbar.ql-snow .ql-picker-label:hover,
+    .ql-toolbar.ql-snow .ql-picker-item:hover,
+    .ql-toolbar.ql-snow button:hover .ql-stroke,
+    .ql-toolbar.ql-snow button.ql-active .ql-stroke {
+        stroke: #6366f1; /* indigo-500 */
+    }
+    .ql-toolbar.ql-snow button:hover .ql-fill,
+    .ql-toolbar.ql-snow button.ql-active .ql-fill {
+        fill: #6366f1;
+    }
+    .ql-toolbar.ql-snow .ql-picker-label:hover,
+    .ql-toolbar.ql-snow .ql-picker-item.ql-selected,
+    .ql-toolbar.ql-snow button:hover,
+    .ql-toolbar.ql-snow button.ql-active {
+        color: #6366f1;
+    }
+    .ql-container.ql-snow:focus-within {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+    .ql-editor {
+        min-height: 240px;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #1f2937;
+    }
+    .ql-editor.ql-blank::before {
+        color: #9ca3af;
+        font-style: normal;
+    }
+    .ql-editor h1, .ql-editor h2, .ql-editor h3 { font-weight: 600; }
+    .ql-editor blockquote {
+        border-left: 4px solid #e0e7ff;
+        background: #eef2ff;
+        padding: 0.5rem 1rem;
+        border-radius: 0 0.25rem 0.25rem 0;
+        color: #4338ca;
+    }
+    .ql-editor pre.ql-syntax {
+        background-color: #1e1b4b;
+        color: #c7d2fe;
+        border-radius: 0.375rem;
+        font-size: 0.8rem;
+    }
+</style>
+@endpush
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -40,7 +105,10 @@
 
                         <div>
                             <x-input-label for="content" :value="__('Content')" />
-                            <textarea id="content" name="content" rows="10" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('content') }}</textarea>
+                            <!-- Hidden textarea untuk submit -->
+                            <textarea id="content" name="content" class="hidden">{{ old('content') }}</textarea>
+                            <!-- Quill editor container -->
+                            <div id="quill-editor" class="mt-1 bg-white"></div>
                             <x-input-error class="mt-2" :messages="$errors->get('content')" />
                         </div>
 
@@ -105,6 +173,19 @@
                 errorMessage: '',
                 isSubmitting: false,
                 submitForm(e) {
+                    // Sync konten Quill ke hidden textarea
+                    const quillContent = quill.root.innerHTML;
+                    const isEmpty = quill.getText().trim().length === 0;
+
+                    if (isEmpty) {
+                        quill.root.style.borderColor = '#ef4444';
+                        quill.root.focus();
+                        return;
+                    }
+
+                    quill.root.style.borderColor = '';
+                    document.getElementById('content').value = quillContent;
+
                     const form = e.target;
                     const fileInput = document.getElementById('images');
                     if (fileInput && fileInput.files.length > 0) {
@@ -135,4 +216,31 @@
             }
         }
     </script>
+
+    @push('scripts')
+    <script>
+        const quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            placeholder: 'Tulis konten post di sini...',
+            modules: {
+                toolbar: [
+                    [{ header: [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ color: [] }, { background: [] }],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    [{ indent: '-1' }, { indent: '+1' }],
+                    ['blockquote', 'code-block'],
+                    ['link'],
+                    ['clean'],
+                ],
+            },
+        });
+
+        // Isi konten awal dari old() jika ada (setelah validation error)
+        const existingContent = document.getElementById('content').value;
+        if (existingContent) {
+            quill.root.innerHTML = existingContent;
+        }
+    </script>
+    @endpush
 </x-app-layout>

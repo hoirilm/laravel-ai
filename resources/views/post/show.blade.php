@@ -25,8 +25,8 @@
                 </div>
             @endif
 
-            <div class="prose prose-lg prose-indigo mx-auto text-gray-700 leading-relaxed">
-                {!! nl2br(e($post->content)) !!}
+            <div class="prose prose-lg prose-indigo prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-indigo-600 prose-blockquote:border-indigo-300 prose-code:text-indigo-700 max-w-none mx-auto leading-relaxed">
+                {!! $post->content !!}
             </div>
 
             <div class="mt-16 pt-8 border-t border-gray-100 text-center">
